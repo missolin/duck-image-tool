@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鸭鸭图 - 媒体内容保护工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #99ccff 0%, #66b3ff 100%);
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .content {
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        
+        .content.single-column {
+            display: block;
+        }
+        
+        .sidebar {
+            flex: 0 0 220px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 12px;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .sidebar.active {
+            display: block;
+        }
+        
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        /* 视频列表样式 */
+        .video-list-header {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .video-list-header button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        
+        .video-list-header button:hover {
+            background: #cc0000;
+        }
+        
+        .video-list {
+            list-style: none;
+        }
+        
+        .video-item {
+            background: white;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .video-item:hover {
+            background: #f0f0ff;
+            border-color: #667eea;
+        }
+        
+        .video-item.selected {
+            background: #e6e6ff;
+            border-color: #667eea;
+        }
+        
+        .video-item-name {
+            font-size: 0.9em;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+        
+        .video-item-info {
+            font-size: 0.75em;
+            color: #666;
+        }
+        
+        .video-item-actions {
+            margin-top: 6px;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .video-item-actions button {
+            flex: 1;
+            padding: 4px 8px;
+            font-size: 0.75em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-load {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-load:hover {
+            background: #5568d3;
+        }
+        
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #ff5252;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .file-upload {
+            border: 3px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f9f9ff;
+        }
+        
+        .file-upload.dragover {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+        
+        .file-upload input {
+            display: none;
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f9ff;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+        
+        .result img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .error {
+            background: #fff0f0;
+            border-left-color: #ff4444;
+            color: #cc0000;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hint {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* 视频编辑器样式 */
+        .video-container {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            height: 580px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .video-container video {
+            position: relative;
+            z-index: 1;
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        
+        .video-placeholder {
+            text-align: center;
+            color: #999;
+            padding: 60px 20px;
+        }
+        
+        .video-placeholder p:first-child {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .video-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .video-info p {
+            margin: 8px 0;
+            color: #333;
+        }
+        
+        #frame-canvas {
+            display: block;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* 视频合并样式 */
+        .merge-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        /* 时间轴样式 */
+        .timeline-container {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            min-height: 120px;
+        }
+        
+        .timeline-header {
+            color: #fff;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .timeline-duration {
+            color: #52c41a;
+            font-weight: 600;
+        }
+        
+        .timeline-tracks {
+            background: #1a1a1a;
+            border-radius: 6px;
+            padding: 10px;
+            min-height: 80px;
+            position: relative;
+        }
+        
+        .timeline-empty {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-size: 0.85em;
+        }
+        
+        .timeline-clips {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .timeline-clip {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: white;
+            font-size: 0.8em;
+            cursor: move;
+            position: relative;
+            min-width: 100px;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .timeline-clip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            border-color: #52c41a;
+        }
+        
+        .timeline-clip.dragging {
+            opacity: 0.5;
+        }
+        
+        .timeline-clip-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .timeline-clip-duration {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .timeline-clip-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8em;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .timeline-clip-remove:hover {
+            background: #ff4444;
+        }
+        
+        .merge-list {
+            list-style: none;
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .merge-item {
+            background: white;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .merge-item-name {
+            font-size: 0.9em;
+            color: #333;
+            flex: 1;
+        }
+        
+        .merge-item-remove {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+        
+        .merge-item-remove:hover {
+            background: #ff5252;
+        }
+        
+        .merge-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .merge-controls button {
+            flex: 1;
+        }
+        
+        .merge-progress {
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦆 鸭鸭图</h1>
+            <p>媒体内容保护工具 V1.2</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('encode', this)">编码</button>
+            <button class="tab" onclick="switchTab('decode', this)">解码</button>
+            <button class="tab" onclick="switchTab('merge', this)">视频合并</button>
+        </div>
+        
+        <div class="content" id="main-content">
+            <!-- 全局侧边栏（视频列表） -->
+            <div class="sidebar" id="global-sidebar">
+                <div class="video-list-header">
+                    <span>📹 视频列表</span>
+                    <button onclick="clearAllVideos()" title="清空所有">清空</button>
+                </div>
+                <ul class="video-list" id="video-list-global">
+                    <li style="text-align: center; color: #999; padding: 20px;">暂无视频</li>
+                </ul>
+            </div>
+            
+            <!-- 主内容区 -->
+            <div class="main-content">
+            <!-- 编码标签页 -->
+            <div id="encode-tab" class="tab-content active">
+                <form id="encode-form">
+                    <div class="form-group">
+                        <label>上传文件</label>
+                        <div class="file-upload" id="encode-upload" tabindex="0">
+                            <input type="file" id="encode-file" accept="image/*,video/*">
+                            <p>📁 点击或拖拽文件到这里</p>
+                            <p class="hint">支持图片（PNG/JPG/BMP/WEBP）和视频（MP4/AVI/MOV）</p>
+                            <p class="hint">💡 也可以直接 Ctrl+V 粘贴图片</p>
+                        </div>
+                        <div class="file-info" id="encode-file-info"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>标题（可选）</label>
+                        <input type="text" id="encode-title" placeholder="在鸭子图上显示的标题">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>密码（可选）</label>
+                        <input type="password" id="encode-password" placeholder="留空则不加密">
+                        <p class="hint">设置密码后，解码时需要相同密码</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>压缩级别</label>
+                        <select id="encode-compress">
+                            <option value="2">低压缩（画质最好）</option>
+                            <option value="6">中压缩（平衡）</option>
+                            <option value="8">高压缩（体积最小）</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">生成鸭子图</button>
+                </form>
+                
+                <div class="loading" id="encode-loading">
+                    <div class="spinner"></div>
+                    <p>正在生成鸭子图...</p>
+                </div>
+                
+                <div class="result" id="encode-result"></div>
+            </div>
+            
+            <!-- 解码标签页 -->
+            <div id="decode-tab" class="tab-content">
+                <form id="decode-form">
+                    <div class="form-group">
+                        <label>方式1：从 URL 加载（推荐）</label>
+                        <input type="text" id="decode-url" placeholder="粘贴图片链接，例如：https://example.com/duck.png">
+                        <p class="hint">💡 右键图片 → 复制图片地址 → 粘贴到这里</p>
+                        <button type="button" class="btn btn-primary" onclick="loadImageFromUrl()" style="margin-top: 10px;">从 URL 加载</button>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 20px 0; color: #999;">或者</div>
+                    
+                    <div class="form-group">
+                        <label>方式2：上传鸭子图</label>
+                        <div class="file-upload" id="decode-upload" tabindex="0">
+                            <input type="file" id="decode-file" accept="image/png,image/*">
+                            <p>📁 点击或拖拽鸭子图到这里</p>
+                            <p class="hint">仅支持 PNG 格式</p>
+                            <p class="hint" style="color: #ff6600;">⚠️ 粘贴可能导致图片压缩，推荐下载后拖拽</p>
+                        </div>
+                        <div class="file-info" id="decode-file-info"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>导出文件名（可选）</label>
+                        <input type="text" id="decode-filename" placeholder="留空则自动生成文件名">
+                        <p class="hint">不需要填扩展名，会自动添加</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>密码（如果有）</label>
+                        <input type="password" id="decode-password" placeholder="如果编码时设置了密码，请输入">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">解码提取</button>
+                </form>
+                
+                <div class="loading" id="decode-loading">
+                    <div class="spinner"></div>
+                    <p>正在解码...</p>
+                </div>
+                
+                <div class="result" id="decode-result"></div>
+            </div>
+            
+            <!-- 视频合并标签页 -->
+            <div id="merge-tab" class="tab-content">
+                <div class="form-group">
+                    <label>快速上传</label>
+                    <div class="file-upload" id="merge-upload">
+                        <input type="file" id="merge-file" accept="video/*" multiple>
+                        <p>📁 点击或拖拽视频文件到这里</p>
+                        <p class="hint">支持多选，可一次上传多个视频</p>
+                    </div>
+                </div>
+                
+                <!-- 视频预览 -->
+                <div class="form-group">
+                    <label>时间轴预览</label>
+                    <div class="video-container" id="merge-video-container">
+                        <video id="merge-video-player" style="width: 100%; border-radius: 8px;"></video>
+                        <div class="video-placeholder" id="merge-video-placeholder" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+                            <div style="text-align: center; color: #999;">
+                                <p style="font-size: 3em; margin-bottom: 10px;">🎬</p>
+                                <p>暂无预览</p>
+                                <p class="hint">添加视频到时间轴后可预览</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 播放控制 -->
+                    <div class="playback-controls" id="playback-controls" style="display: none; margin-top: 15px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <button class="btn-play" onclick="togglePlayback()" id="play-btn" style="padding: 8px 16px; border: none; border-radius: 6px; background: #667eea; color: white; cursor: pointer; font-size: 1.1em;">
+                                ▶️ 播放
+                            </button>
+                            <span id="current-time-display" style="font-size: 0.9em; color: #666;">00:00</span>
+                            <span style="color: #999;">/</span>
+                            <span id="total-time-display" style="font-size: 0.9em; color: #666;">00:00</span>
+                            <div style="flex: 1;"></div>
+                            <button class="btn-capture" onclick="captureFrameFromMerge()" id="capture-frame-btn" style="padding: 8px 16px; border: none; border-radius: 6px; background: #52c41a; color: white; cursor: pointer; font-size: 1em;">
+                                📸 截取当前帧
+                            </button>
+                        </div>
+                        
+                        <!-- 播放进度条 -->
+                        <div class="playback-progress" style="position: relative; height: 40px; background: #f0f0f0; border-radius: 6px; cursor: pointer;" onclick="seekTimeline(event)">
+                            <div class="playback-fill" id="playback-fill" style="position: absolute; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 6px; width: 0%; transition: width 0.1s;"></div>
+                            <div class="playhead" id="playhead" style="position: absolute; top: 0; bottom: 0; width: 3px; background: #ff4444; left: 0%; box-shadow: 0 0 8px rgba(255, 68, 68, 0.6);"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 时间轴 -->
+                <div class="form-group">
+                    <label>时间轴</label>
+                    <div class="timeline-container">
+                        <div class="timeline-header">
+                            <span>📽️ 拖拽视频到这里排列顺序</span>
+                            <span class="timeline-duration" id="timeline-duration">总时长: 00:00</span>
+                        </div>
+                        <div class="timeline-tracks" id="timeline-tracks">
+                            <div class="timeline-empty" id="timeline-empty">
+                                从左侧拖拽视频或点击"添加"按钮
+                            </div>
+                            <div class="timeline-clips" id="timeline-clips" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 截帧结果 -->
+                <div class="result" id="merge-frame-result" style="display: none;">
+                    <h3>✅ 截取成功！</h3>
+                    <canvas id="merge-frame-canvas" style="max-width: 100%; border-radius: 8px; margin: 15px 0;"></canvas>
+                    <p id="merge-frame-info"></p>
+                    <button class="btn btn-primary" onclick="downloadMergeFrame()">下载图片</button>
+                </div>
+                
+                <div class="merge-controls">
+                    <button class="btn btn-primary" onclick="clearTimeline()" style="background: #ff6b6b;">清空时间轴</button>
+                    <button class="btn btn-primary" onclick="mergeVideos()" id="merge-btn" disabled>
+                        🎥 合并并导出
+                    </button>
+                </div>
+                
+                <div class="merge-progress" id="merge-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%;">0%</div>
+                    </div>
+                    <p style="text-align: center; margin-top: 10px; color: #666;" id="progress-text">正在处理...</p>
+                </div>
+                
+                <div class="result" id="merge-result"></div>
+            </div>
+            </div>
+        </div>
+    
+    <script>
+        // 标签页切换
+        function switchTab(tab, clickedElement) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // 如果有点击的元素，激活它；否则根据 tab 名称查找
+            if (clickedElement) {
+                clickedElement.classList.add('active');
+            } else {
+                const tabs = document.querySelectorAll('.tab');
+                const tabIndex = {'encode': 0, 'decode': 1, 'merge': 2};
+                if (tabIndex[tab] !== undefined) {
+                    tabs[tabIndex[tab]].classList.add('active');
+                }
+            }
+            
+            document.getElementById(tab + '-tab').classList.add('active');
+            
+            // 控制侧边栏和布局
+            const sidebar = document.getElementById('global-sidebar');
+            const mainContent = document.getElementById('main-content');
+            
+            if (tab === 'merge') {
+                // 显示侧边栏，使用双栏布局
+                sidebar.classList.add('active');
+                mainContent.classList.remove('single-column');
+            } else {
+                // 隐藏侧边栏，使用单栏布局
+                sidebar.classList.remove('active');
+                mainContent.classList.add('single-column');
+            }
+        }
+        
+        // 文件上传处理
+        function setupFileUpload(uploadId, fileInputId, fileInfoId) {
+            const upload = document.getElementById(uploadId);
+            const fileInput = document.getElementById(fileInputId);
+            const fileInfo = document.getElementById(fileInfoId);
+            
+            // 点击上传
+            upload.onclick = (e) => {
+                // 防止点击时触发拖拽区域的其他事件
+                if (e.target === upload || e.target.parentElement === upload) {
+                    fileInput.click();
+                }
+            };
+            
+            // 文件选择变化
+            fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    fileInfo.style.display = 'block';
+                    fileInfo.innerHTML = `
+                        <strong>已选择:</strong> ${file.name}<br>
+                        <strong>大小:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB
+                    `;
+                }
+            };
+            
+            // 拖拽上传 - 修复版
+            upload.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                upload.classList.add('dragover');
+            });
+            
+            upload.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                upload.classList.add('dragover');
+            });
+            
+            upload.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // 只有当离开整个上传区域时才移除样式
+                if (e.target === upload) {
+                    upload.classList.remove('dragover');
+                }
+            });
+            
+            upload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                upload.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    // 创建新的 FileList 对象
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(files[0]);
+                    fileInput.files = dataTransfer.files;
+                    
+                    // 触发 change 事件
+                    const event = new Event('change', { bubbles: true });
+                    fileInput.dispatchEvent(event);
+                    
+                    // 显示文件信息
+                    fileInfo.style.display = 'block';
+                    fileInfo.innerHTML = `
+                        <strong>已选择:</strong> ${files[0].name}<br>
+                        <strong>大小:</strong> ${(files[0].size / 1024 / 1024).toFixed(2)} MB
+                    `;
+                }
+            });
+        }
+        
+        setupFileUpload('encode-upload', 'encode-file', 'encode-file-info');
+        setupFileUpload('decode-upload', 'decode-file', 'decode-file-info');
+        
+        // 视频合并页文件上传（支持多选）
+        setupMergeUpload('merge-upload', 'merge-file');
+        
+        // 合并页文件上传处理（支持多选）
+        function setupMergeUpload(uploadId, fileInputId) {
+            const upload = document.getElementById(uploadId);
+            const fileInput = document.getElementById(fileInputId);
+            
+            // 点击上传
+            upload.onclick = (e) => {
+                if (e.target === upload || e.target.parentElement === upload) {
+                    fileInput.click();
+                }
+            };
+            
+            // 文件选择变化（支持多选）
+            fileInput.onchange = (e) => {
+                const files = Array.from(e.target.files);
+                files.forEach(file => {
+                    if (file.type.startsWith('video/')) {
+                        const url = URL.createObjectURL(file);
+                        addVideoToLibrary(file.name, url, file);
+                    }
+                });
+                
+                if (files.length > 0) {
+                    // 自动切换到合并标签页
+                    switchTab('merge');
+                }
+            };
+            
+            // 拖拽上传
+            upload.ondragover = (e) => {
+                e.preventDefault();
+                upload.classList.add('dragover');
+            };
+            
+            upload.ondragleave = () => {
+                upload.classList.remove('dragover');
+            };
+            
+            upload.ondrop = (e) => {
+                e.preventDefault();
+                upload.classList.remove('dragover');
+                
+                const files = Array.from(e.dataTransfer.files);
+                files.forEach(file => {
+                    if (file.type.startsWith('video/')) {
+                        const url = URL.createObjectURL(file);
+                        addVideoToLibrary(file.name, url, file);
+                    }
+                });
+            };
+        }
+        
+        // 粘贴图片功能（改进版：保持原始质量）
+        function setupPasteImage(uploadId, fileInputId, fileInfoId) {
+            const upload = document.getElementById(uploadId);
+            const fileInput = document.getElementById(fileInputId);
+            const fileInfo = document.getElementById(fileInfoId);
+            
+            // 监听整个文档的粘贴事件
+            document.addEventListener('paste', async (e) => {
+                // 检查当前是否在对应的标签页
+                const currentTab = document.querySelector('.tab-content.active');
+                if (!currentTab.contains(upload)) {
+                    return;
+                }
+                
+                const items = e.clipboardData.items;
+                let foundImage = false;
+                
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    
+                    // 优先处理文件类型（保持原始质量）
+                    if (item.kind === 'file' && item.type.indexOf('image') !== -1) {
+                        e.preventDefault();
+                        foundImage = true;
+                        
+                        const blob = item.getAsFile();
+                        
+                        // 如果是 PNG，直接使用（不重新编码）
+                        let finalFile;
+                        if (blob.type === 'image/png') {
+                            finalFile = new File([blob], `pasted-${Date.now()}.png`, { type: 'image/png' });
+                        } else {
+                            // 其他格式转为 PNG（无损）
+                            try {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                const img = await createImageBitmap(blob);
+                                
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                ctx.drawImage(img, 0, 0);
+                                
+                                // 转为 PNG Blob（无损）
+                                const pngBlob = await new Promise(resolve => {
+                                    canvas.toBlob(resolve, 'image/png', 1.0);
+                                });
+                                
+                                finalFile = new File([pngBlob], `pasted-${Date.now()}.png`, { type: 'image/png' });
+                            } catch (err) {
+                                console.error('图片转换失败:', err);
+                                finalFile = new File([blob], `pasted-${Date.now()}.png`, { type: blob.type });
+                            }
+                        }
+                        
+                        // 设置到 input
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(finalFile);
+                        fileInput.files = dataTransfer.files;
+                        
+                        // 显示文件信息（带警告）
+                        fileInfo.style.display = 'block';
+                        const sizeWarning = finalFile.size < 1024 * 1024 ? 
+                            '<br><span style="color: #ff6600;">⚠️ 文件较小，可能被压缩。建议下载后拖拽上传</span>' : '';
+                        fileInfo.innerHTML = `
+                            <strong>✅ 已粘贴图片</strong><br>
+                            <strong>大小:</strong> ${(finalFile.size / 1024 / 1024).toFixed(2)} MB<br>
+                            <strong>类型:</strong> ${finalFile.type}${sizeWarning}
+                        `;
+                        
+                        // 添加视觉反馈
+                        upload.style.borderColor = '#667eea';
+                        upload.style.background = '#f0f0ff';
+                        setTimeout(() => {
+                            upload.style.borderColor = '';
+                            upload.style.background = '';
+                        }, 500);
+                        
+                        break;
+                    }
+                }
+                
+                // 如果没有找到图片，提示用户
+                if (!foundImage && e.clipboardData.items.length > 0) {
+                    const hasImage = Array.from(e.clipboardData.items).some(item => 
+                        item.type.indexOf('image') !== -1
+                    );
+                    
+                    if (hasImage) {
+                        fileInfo.style.display = 'block';
+                        fileInfo.innerHTML = `
+                            <strong>⚠️ 提示</strong><br>
+                            检测到图片但可能被压缩。建议：<br>
+                            1. 右键图片 → "复制图片"<br>
+                            2. 或者直接下载后拖拽上传（推荐）
+                        `;
+                    }
+                }
+            });
+            
+            // 添加焦点提示
+            upload.addEventListener('focus', () => {
+                upload.style.borderColor = '#667eea';
+            });
+            
+            upload.addEventListener('blur', () => {
+                upload.style.borderColor = '';
+            });
+        }
+        
+        setupPasteImage('encode-upload', 'encode-file', 'encode-file-info');
+        setupPasteImage('decode-upload', 'decode-file', 'decode-file-info');
+        
+        // 从 URL 加载图片
+        async function loadImageFromUrl() {
+            const urlInput = document.getElementById('decode-url');
+            const fileInput = document.getElementById('decode-file');
+            const fileInfo = document.getElementById('decode-file-info');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('请输入图片 URL');
+                return;
+            }
+            
+            fileInfo.style.display = 'block';
+            fileInfo.innerHTML = '<strong>⏳ 正在加载图片...</strong>';
+            
+            try {
+                // 通过后端代理获取图片（避免跨域问题）
+                const response = await fetch('/api/fetch-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '加载失败');
+                }
+                
+                const blob = await response.blob();
+                const filename = url.split('/').pop().split('?')[0] || 'image.png';
+                const file = new File([blob], filename, { type: blob.type });
+                
+                // 设置到文件输入框
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+                
+                fileInfo.innerHTML = `
+                    <strong>✅ 加载成功</strong><br>
+                    <strong>文件名:</strong> ${filename}<br>
+                    <strong>大小:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
+                    <strong>类型:</strong> ${file.type}
+                `;
+                
+                // 清空 URL 输入框
+                urlInput.value = '';
+                
+            } catch (error) {
+                fileInfo.innerHTML = `
+                    <strong style="color: #cc0000;">❌ 加载失败</strong><br>
+                    ${error.message}<br>
+                    <small>请检查 URL 是否正确，或者尝试下载后上传</small>
+                `;
+            }
+        }
+        
+        // 编码表单提交
+        document.getElementById('encode-form').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('encode-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('请先选择文件');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('title', document.getElementById('encode-title').value);
+            formData.append('password', document.getElementById('encode-password').value);
+            formData.append('compress', document.getElementById('encode-compress').value);
+            
+            const loading = document.getElementById('encode-loading');
+            const result = document.getElementById('encode-result');
+            const btn = e.target.querySelector('button');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/encode', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '编码失败');
+                }
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                // 生成文件名：标题_日期_时间
+                const title = document.getElementById('encode-title').value.trim() || 'duck';
+                const now = new Date();
+                const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+                const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+                const filename = `${title}_${dateStr}_${timeStr}.png`;
+                
+                result.className = 'result';
+                result.innerHTML = `
+                    <h3>✅ 生成成功！</h3>
+                    <img src="${url}" alt="鸭子图">
+                    <br><br>
+                    <p>文件名: ${filename}</p>
+                    <a href="${url}" download="${filename}" class="btn btn-primary">下载鸭子图</a>
+                `;
+                result.style.display = 'block';
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `<h3>❌ 错误</h3><p>${error.message}</p>`;
+                result.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                btn.disabled = false;
+            }
+        };
+        
+        // 解码表单提交
+        document.getElementById('decode-form').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('decode-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('请先选择鸭子图');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('password', document.getElementById('decode-password').value);
+            
+            const loading = document.getElementById('decode-loading');
+            const result = document.getElementById('decode-result');
+            const btn = e.target.querySelector('button');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/decode', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '解码失败');
+                }
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                // 获取原始文件名和类型
+                let originalFilename = response.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] || 'recovered';
+                const contentType = response.headers.get('Content-Type') || '';
+                
+                // 从 Content-Type 推断扩展名
+                const mimeToExt = {
+                    'video/mp4': 'mp4',
+                    'video/avi': 'avi',
+                    'video/quicktime': 'mov',
+                    'image/png': 'png',
+                    'image/jpeg': 'jpg',
+                    'image/gif': 'gif',
+                    'image/bmp': 'bmp',
+                    'image/webp': 'webp',
+                    'text/plain': 'txt'
+                };
+                
+                // 获取用户自定义文件名
+                const customFilename = document.getElementById('decode-filename').value.trim();
+                
+                // 生成最终文件名
+                let finalFilename;
+                if (customFilename) {
+                    // 用户指定了文件名，保留原扩展名
+                    let ext = 'bin';
+                    if (originalFilename.includes('.')) {
+                        ext = originalFilename.split('.').pop();
+                    } else if (mimeToExt[contentType]) {
+                        ext = mimeToExt[contentType];
+                    }
+                    
+                    // 如果用户已经写了扩展名，就不重复添加
+                    if (customFilename.includes('.')) {
+                        finalFilename = customFilename;
+                    } else {
+                        finalFilename = `${customFilename}.${ext}`;
+                    }
+                } else {
+                    // 自动生成：日期_时间_原文件名
+                    const now = new Date();
+                    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+                    const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+                    
+                    // 正确处理扩展名
+                    let ext = 'bin';
+                    let baseName = 'recovered';
+                    
+                    if (originalFilename.includes('.')) {
+                        const parts = originalFilename.split('.');
+                        ext = parts.pop(); // 最后一个是扩展名
+                        baseName = parts.join('.'); // 其余部分是文件名
+                    } else {
+                        baseName = originalFilename;
+                        // 从 Content-Type 推断扩展名
+                        if (mimeToExt[contentType]) {
+                            ext = mimeToExt[contentType];
+                        }
+                    }
+                    
+                    finalFilename = `duck_decoded_${dateStr}_${timeStr}_${baseName}.${ext}`;
+                }
+                
+                result.className = 'result';
+                result.innerHTML = `
+                    <h3>✅ 解码成功！</h3>
+                    <p>文件名: ${finalFilename}</p>
+                    <br>
+                    <a href="${url}" download="${finalFilename}" class="btn btn-primary">下载文件</a>
+                `;
+                result.style.display = 'block';
+                
+                // 如果是视频，自动加载到视频库
+                if (contentType.startsWith('video/')) {
+                    addVideoToLibrary(finalFilename, url, blob);
+                    // 自动切换到合并标签页
+                    setTimeout(() => {
+                        switchTab('merge');
+                    }, 500);
+                }
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = `<h3>❌ 错误</h3><p>${error.message}</p>`;
+                result.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                btn.disabled = false;
+            }
+        };
+        
+        // ========== 视频管理功能 ==========
+        let videoLibrary = []; // 存储所有视频 {id, name, url, blob, duration, size}
+        let mergeQueue = []; // 合并队列
+        let videoIdCounter = 0;
+        
+        // 格式化时间
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // 截取合并页当前帧
+        function captureFrameFromMerge() {
+            const videoPlayer = document.getElementById('merge-video-player');
+            const canvas = document.getElementById('merge-frame-canvas');
+            const frameResult = document.getElementById('merge-frame-result');
+            const frameInfo = document.getElementById('merge-frame-info');
+            
+            if (!videoPlayer.src || mergeQueue.length === 0) {
+                alert('请先添加视频到时间轴');
+                return;
+            }
+            
+            // 设置 canvas 尺寸为视频原始尺寸
+            canvas.width = videoPlayer.videoWidth;
+            canvas.height = videoPlayer.videoHeight;
+            
+            // 绘制当前帧
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
+            
+            // 显示结果
+            const currentTime = formatTime(currentPlaybackTime);
+            frameInfo.textContent = `时间点: ${currentTime} | 尺寸: ${canvas.width} x ${canvas.height}`;
+            frameResult.style.display = 'block';
+            
+            // 滚动到结果
+            frameResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        // 下载合并页截取的帧
+        function downloadMergeFrame() {
+            const canvas = document.getElementById('merge-frame-canvas');
+            
+            // 生成文件名
+            const timestamp = formatTime(currentPlaybackTime).replace(':', '-');
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+            const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+            const filename = `timeline_frame_${timestamp}_${dateStr}_${timeStr}.png`;
+            
+            // 转换为 blob 并下载
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        }
+        
+        // 添加视频到库
+        function addVideoToLibrary(name, url, blob) {
+            // 检查重名并自动重命名
+            let finalName = name;
+            let counter = 1;
+            
+            while (videoLibrary.find(v => v.name === finalName)) {
+                // 分离文件名和扩展名
+                const lastDotIndex = name.lastIndexOf('.');
+                if (lastDotIndex > 0) {
+                    const baseName = name.substring(0, lastDotIndex);
+                    const extension = name.substring(lastDotIndex);
+                    finalName = `${baseName} (${counter})${extension}`;
+                } else {
+                    finalName = `${name} (${counter})`;
+                }
+                counter++;
+            }
+            
+            const id = ++videoIdCounter;
+            const video = {
+                id: id,
+                name: finalName,
+                url: url,
+                blob: blob,
+                duration: '00:00',
+                durationSeconds: 0,
+                size: `${(blob.size / 1024 / 1024).toFixed(2)} MB`
+            };
+            
+            // 获取视频时长
+            const tempVideo = document.createElement('video');
+            tempVideo.src = url;
+            tempVideo.onloadedmetadata = () => {
+                video.duration = formatTime(tempVideo.duration);
+                video.durationSeconds = tempVideo.duration;
+                updateVideoList();
+                updateTimeline(); // 更新时间轴显示
+            };
+            
+            videoLibrary.push(video);
+            updateVideoList();
+            
+            return id;
+        }
+        
+        // 更新视频列表显示
+        function updateVideoList() {
+            const videoListGlobal = document.getElementById('video-list-global');
+            
+            if (videoLibrary.length === 0) {
+                videoListGlobal.innerHTML = '<li style="text-align: center; color: #999; padding: 20px;">暂无视频</li>';
+                return;
+            }
+            
+            // 全局视频列表（播放、添加到合并、删除）
+            videoListGlobal.innerHTML = videoLibrary.map(video => `
+                <li class="video-item" data-id="${video.id}" draggable="true" onclick="previewVideoInMerge(${video.id})">
+                    <div class="video-item-name">${video.name}</div>
+                    <div class="video-item-info">
+                        ${video.duration || '加载中...'} | ${video.size}
+                    </div>
+                    <div class="video-item-actions">
+                        <button class="btn-primary" onclick="addToMergeQueue(${video.id}); event.stopPropagation();" style="background: #52c41a;">添加</button>
+                        <button class="btn-delete" onclick="deleteVideoFromLibrary(${video.id}); event.stopPropagation();">删除</button>
+                    </div>
+                </li>
+            `).join('');
+            
+            // 添加拖拽功能
+            setupVideoListDragDrop();
+        }
+        
+        // 在合并页预览视频
+        function previewVideoInMerge(id) {
+            const video = videoLibrary.find(v => v.id === id);
+            if (!video) {
+                console.log('Video not found:', id);
+                return;
+            }
+            
+            // 检查当前在哪个标签页
+            const currentTab = document.querySelector('.tab-content.active');
+            
+            if (currentTab.id === 'merge-tab') {
+                // 合并页的预览
+                const videoPlayer = document.getElementById('merge-video-player');
+                const videoPlaceholder = document.getElementById('merge-video-placeholder');
+                
+                if (!videoPlayer || !videoPlaceholder) {
+                    console.error('Video player elements not found');
+                    return;
+                }
+                
+                // 隐藏占位符
+                videoPlaceholder.style.opacity = '0';
+                videoPlaceholder.style.pointerEvents = 'none';
+                
+                // 设置视频源并显示
+                videoPlayer.src = video.url;
+                videoPlayer.style.opacity = '1';
+                videoPlayer.load(); // 强制加载视频
+                
+                console.log('Video preview loaded:', video.name);
+            }
+        }
+        
+        // 设置视频列表拖拽到时间轴
+        function setupVideoListDragDrop() {
+            const videoItems = document.querySelectorAll('#video-list-global .video-item');
+            
+            videoItems.forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('video-id', item.dataset.id);
+                    e.dataTransfer.effectAllowed = 'copy';
+                });
+            });
+        }
+        
+        // 从库中删除视频
+        function deleteVideoFromLibrary(id) {
+            if (!confirm('确定要删除这个视频吗？')) return;
+            
+            const index = videoLibrary.findIndex(v => v.id === id);
+            if (index !== -1) {
+                URL.revokeObjectURL(videoLibrary[index].url);
+                videoLibrary.splice(index, 1);
+                updateVideoList();
+                
+                // 同时从时间轴中移除
+                mergeQueue = mergeQueue.filter(v => v.id !== id);
+                updateTimeline();
+            }
+        }
+        
+        // 清空所有视频
+        function clearAllVideos() {
+            if (videoLibrary.length === 0) return;
+            if (!confirm('确定要清空所有视频吗？')) return;
+            
+            videoLibrary.forEach(v => URL.revokeObjectURL(v.url));
+            videoLibrary = [];
+            mergeQueue = [];
+            updateVideoList();
+            updateTimeline();
+        }
+        
+        // ========== 视频合并功能 ==========
+        
+        let isPlaying = false;
+        let currentPlaybackTime = 0;
+        let totalDuration = 0;
+        let playbackInterval = null;
+        
+        // 添加到时间轴
+        function addToMergeQueue(id) {
+            const video = videoLibrary.find(v => v.id === id);
+            if (!video) return;
+            
+            // 检查是否已在队列中
+            if (mergeQueue.find(v => v.id === id)) {
+                alert('该视频已在时间轴中');
+                return;
+            }
+            
+            mergeQueue.push(video);
+            updateTimeline();
+            updatePlaybackPreview();
+            
+            // 如果不在合并页，自动切换
+            const currentTab = document.querySelector('.tab-content.active');
+            if (currentTab.id !== 'merge-tab') {
+                switchTab('merge');
+            }
+        }
+        
+        // 更新播放预览
+        function updatePlaybackPreview() {
+            const playbackControls = document.getElementById('playback-controls');
+            const videoPlaceholder = document.getElementById('merge-video-placeholder');
+            
+            if (mergeQueue.length > 0) {
+                playbackControls.style.display = 'block';
+                videoPlaceholder.style.opacity = '0';
+                
+                // 计算总时长
+                totalDuration = mergeQueue.reduce((sum, v) => sum + (v.durationSeconds || 0), 0);
+                document.getElementById('total-time-display').textContent = formatTime(totalDuration);
+                
+                // 加载第一个视频
+                if (!isPlaying) {
+                    loadVideoAtTime(0);
+                }
+            } else {
+                playbackControls.style.display = 'none';
+                videoPlaceholder.style.opacity = '1';
+                stopPlayback();
+            }
+        }
+        
+        // 在指定时间加载视频
+        function loadVideoAtTime(time) {
+            let accumulatedTime = 0;
+            let targetVideo = null;
+            let videoStartTime = 0;
+            
+            for (const video of mergeQueue) {
+                const videoDuration = video.durationSeconds || 0;
+                if (time >= accumulatedTime && time < accumulatedTime + videoDuration) {
+                    targetVideo = video;
+                    videoStartTime = time - accumulatedTime;
+                    break;
+                }
+                accumulatedTime += videoDuration;
+            }
+            
+            if (targetVideo) {
+                const videoPlayer = document.getElementById('merge-video-player');
+                
+                // 如果是新视频，加载它
+                if (videoPlayer.src !== targetVideo.url) {
+                    videoPlayer.src = targetVideo.url;
+                    videoPlayer.onloadedmetadata = () => {
+                        videoPlayer.currentTime = videoStartTime;
+                        if (isPlaying) {
+                            videoPlayer.play();
+                        }
+                    };
+                } else {
+                    videoPlayer.currentTime = videoStartTime;
+                    if (isPlaying) {
+                        videoPlayer.play();
+                    }
+                }
+            }
+        }
+        
+        // 切换播放/暂停
+        function togglePlayback() {
+            if (mergeQueue.length === 0) {
+                alert('请先添加视频到时间轴');
+                return;
+            }
+            
+            if (isPlaying) {
+                stopPlayback();
+            } else {
+                startPlayback();
+            }
+        }
+        
+        // 开始播放
+        function startPlayback() {
+            isPlaying = true;
+            const playBtn = document.getElementById('play-btn');
+            playBtn.innerHTML = '⏸️ 暂停';
+            
+            const videoPlayer = document.getElementById('merge-video-player');
+            videoPlayer.play();
+            
+            // 监听视频播放
+            videoPlayer.ontimeupdate = () => {
+                if (!isPlaying) return;
+                
+                // 计算当前在时间轴中的位置
+                let accumulatedTime = 0;
+                let currentVideoIndex = -1;
+                
+                for (let i = 0; i < mergeQueue.length; i++) {
+                    const video = mergeQueue[i];
+                    const videoDuration = video.durationSeconds || 0;
+                    
+                    if (videoPlayer.src === video.url) {
+                        currentVideoIndex = i;
+                        currentPlaybackTime = accumulatedTime + videoPlayer.currentTime;
+                        break;
+                    }
+                    accumulatedTime += videoDuration;
+                }
+                
+                // 更新进度显示
+                updatePlaybackProgress();
+            };
+            
+            // 监听视频结束
+            videoPlayer.onended = () => {
+                if (!isPlaying) return;
+                
+                // 查找当前视频在队列中的位置
+                let currentIndex = mergeQueue.findIndex(v => v.url === videoPlayer.src);
+                
+                if (currentIndex !== -1 && currentIndex < mergeQueue.length - 1) {
+                    // 播放下一个视频
+                    const nextVideo = mergeQueue[currentIndex + 1];
+                    videoPlayer.src = nextVideo.url;
+                    videoPlayer.onloadedmetadata = () => {
+                        videoPlayer.currentTime = 0;
+                        videoPlayer.play();
+                    };
+                } else {
+                    // 播放完成
+                    stopPlayback();
+                    currentPlaybackTime = 0;
+                    loadVideoAtTime(0);
+                    updatePlaybackProgress();
+                }
+            };
+        }
+        
+        // 停止播放
+        function stopPlayback() {
+            isPlaying = false;
+            const playBtn = document.getElementById('play-btn');
+            playBtn.innerHTML = '▶️ 播放';
+            
+            const videoPlayer = document.getElementById('merge-video-player');
+            videoPlayer.pause();
+        }
+        
+        // 更新播放进度
+        function updatePlaybackProgress() {
+            const progress = totalDuration > 0 ? (currentPlaybackTime / totalDuration) * 100 : 0;
+            
+            document.getElementById('playback-fill').style.width = progress + '%';
+            document.getElementById('playhead').style.left = progress + '%';
+            document.getElementById('current-time-display').textContent = formatTime(currentPlaybackTime);
+        }
+        
+        // 跳转到指定位置
+        function seekTimeline(event) {
+            if (mergeQueue.length === 0) return;
+            
+            const progressBar = event.currentTarget;
+            const rect = progressBar.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const percentage = clickX / rect.width;
+            
+            currentPlaybackTime = percentage * totalDuration;
+            loadVideoAtTime(currentPlaybackTime);
+            updatePlaybackProgress();
+        }
+        
+        // 更新时间轴显示
+        function updateTimeline() {
+            const timelineEmpty = document.getElementById('timeline-empty');
+            const timelineClips = document.getElementById('timeline-clips');
+            const timelineDuration = document.getElementById('timeline-duration');
+            const mergeBtn = document.getElementById('merge-btn');
+            
+            if (mergeQueue.length === 0) {
+                timelineEmpty.style.display = 'block';
+                timelineClips.style.display = 'none';
+                timelineDuration.textContent = '总时长: 00:00';
+                mergeBtn.disabled = true;
+                updatePlaybackPreview(); // 更新预览状态
+                return;
+            }
+            
+            timelineEmpty.style.display = 'none';
+            timelineClips.style.display = 'flex';
+            mergeBtn.disabled = mergeQueue.length < 2;
+            
+            // 计算总时长
+            let totalSeconds = 0;
+            mergeQueue.forEach(video => {
+                if (video.durationSeconds) {
+                    totalSeconds += video.durationSeconds;
+                }
+            });
+            timelineDuration.textContent = `总时长: ${formatTime(totalSeconds)}`;
+            
+            // 渲染时间轴片段
+            timelineClips.innerHTML = mergeQueue.map((video, index) => `
+                <div class="timeline-clip" draggable="true" data-id="${video.id}" data-index="${index}" onclick="previewVideoInMerge(${video.id})">
+                    <button class="timeline-clip-remove" onclick="removeFromTimeline(${video.id}); event.stopPropagation();">×</button>
+                    <div class="timeline-clip-name" title="${video.name}">${video.name}</div>
+                    <div class="timeline-clip-duration">${video.duration || '00:00'}</div>
+                </div>
+            `).join('');
+            
+            // 添加拖拽事件
+            setupTimelineDragDrop();
+            
+            // 更新播放预览
+            updatePlaybackPreview();
+        }
+        
+        // 设置时间轴拖拽
+        function setupTimelineDragDrop() {
+            const clips = document.querySelectorAll('.timeline-clip');
+            const timelineTracks = document.getElementById('timeline-tracks');
+            
+            let draggedElement = null;
+            let draggedIndex = null;
+            
+            clips.forEach(clip => {
+                clip.addEventListener('dragstart', (e) => {
+                    draggedElement = clip;
+                    draggedIndex = parseInt(clip.dataset.index);
+                    clip.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                
+                clip.addEventListener('dragend', () => {
+                    clip.classList.remove('dragging');
+                    draggedElement = null;
+                });
+                
+                clip.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const afterElement = getDragAfterElement(timelineTracks, e.clientX);
+                    const dragging = document.querySelector('.dragging');
+                    
+                    if (afterElement == null) {
+                        timelineTracks.querySelector('.timeline-clips').appendChild(dragging);
+                    } else {
+                        timelineTracks.querySelector('.timeline-clips').insertBefore(dragging, afterElement);
+                    }
+                });
+                
+                clip.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const dropIndex = parseInt(clip.dataset.index);
+                    
+                    if (draggedIndex !== null && draggedIndex !== dropIndex) {
+                        // 重新排序
+                        const [removed] = mergeQueue.splice(draggedIndex, 1);
+                        const newIndex = draggedIndex < dropIndex ? dropIndex - 1 : dropIndex;
+                        mergeQueue.splice(newIndex, 0, removed);
+                        updateTimeline();
+                    }
+                });
+            });
+            
+            // 时间轴区域拖拽
+            timelineTracks.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            
+            timelineTracks.addEventListener('drop', (e) => {
+                e.preventDefault();
+                // 如果是从视频列表拖拽过来的
+                const videoId = e.dataTransfer.getData('video-id');
+                if (videoId) {
+                    addToMergeQueue(parseInt(videoId));
+                }
+            });
+        }
+        
+        function getDragAfterElement(container, x) {
+            const draggableElements = [...container.querySelectorAll('.timeline-clip:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = x - box.left - box.width / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+        
+        // 从时间轴移除
+        function removeFromTimeline(id) {
+            mergeQueue = mergeQueue.filter(v => v.id !== id);
+            updateTimeline();
+            // 重置播放状态
+            if (isPlaying) {
+                stopPlayback();
+            }
+            currentPlaybackTime = 0;
+            updatePlaybackProgress();
+        }
+        
+        // 清空时间轴
+        function clearTimeline() {
+            if (mergeQueue.length === 0) return;
+            if (!confirm('确定要清空时间轴吗？')) return;
+            mergeQueue = [];
+            updateTimeline();
+            // 重置播放状态
+            if (isPlaying) {
+                stopPlayback();
+            }
+            currentPlaybackTime = 0;
+            updatePlaybackProgress();
+        }
+        
+        // 合并视频（使用后端 FFmpeg）
+        async function mergeVideos() {
+            if (mergeQueue.length < 2) {
+                alert('至少需要2个视频才能合并');
+                return;
+            }
+            
+            const progress = document.getElementById('merge-progress');
+            const result = document.getElementById('merge-result');
+            const mergeBtn = document.getElementById('merge-btn');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            progress.style.display = 'block';
+            result.style.display = 'none';
+            mergeBtn.disabled = true;
+            
+            try {
+                progressFill.style.width = '10%';
+                progressFill.textContent = '10%';
+                progressText.textContent = '正在准备视频...';
+                
+                // 创建 FormData
+                const formData = new FormData();
+                
+                // 按顺序添加视频文件
+                for (let i = 0; i < mergeQueue.length; i++) {
+                    const video = mergeQueue[i];
+                    formData.append('files', video.blob, video.name);
+                    
+                    const percent = 10 + Math.floor((i + 1) / mergeQueue.length * 20);
+                    progressFill.style.width = percent + '%';
+                    progressFill.textContent = percent + '%';
+                }
+                
+                progressFill.style.width = '30%';
+                progressFill.textContent = '30%';
+                progressText.textContent = '正在上传到服务器...';
+                
+                // 发送到后端合并
+                const response = await fetch('/api/merge-videos', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                progressFill.style.width = '60%';
+                progressFill.textContent = '60%';
+                progressText.textContent = '正在合并视频...';
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '合并失败');
+                }
+                
+                progressFill.style.width = '90%';
+                progressFill.textContent = '90%';
+                progressText.textContent = '正在下载结果...';
+                
+                // 获取合并后的视频
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                progressFill.style.width = '100%';
+                progressFill.textContent = '100%';
+                progressText.textContent = '完成！';
+                
+                const now = new Date();
+                const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+                const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+                const filename = `merged_video_${dateStr}_${timeStr}.mp4`;
+                
+                result.className = 'result';
+                result.innerHTML = `
+                    <h3>✅ 合并成功！</h3>
+                    <p>文件名: ${filename}</p>
+                    <p>视频数量: ${mergeQueue.length}</p>
+                    <p>文件大小: ${(blob.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <br>
+                    <a href="${url}" download="${filename}" class="btn btn-primary">下载合并视频</a>
+                `;
+                result.style.display = 'block';
+                
+                setTimeout(() => {
+                    progress.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 2000);
+                
+                mergeBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('合并错误:', error);
+                
+                result.className = 'result error';
+                result.innerHTML = `
+                    <h3>❌ 合并失败</h3>
+                    <p>${error.message}</p>
+                    <p class="hint">提示：请确保服务器已安装 FFmpeg。</p>
+                    <p class="hint">macOS: brew install ffmpeg</p>
+                    <p class="hint">Ubuntu: sudo apt install ffmpeg</p>
+                `;
+                result.style.display = 'block';
+                progress.style.display = 'none';
+                mergeBtn.disabled = false;
+            }
+        }
+        
+        // 修改 handleVideoFile 函数，添加到视频库
+        function handleVideoFile(file, fileInfo) {
+            fileInfo.style.display = 'block';
+            fileInfo.innerHTML = `
+                <strong>✅ 加载成功</strong><br>
+                <strong>文件名:</strong> ${file.name}<br>
+                <strong>大小:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB<br>
+                <strong>类型:</strong> ${file.type}
+            `;
+            
+            // 添加到视频库
+            const url = URL.createObjectURL(file);
+            addVideoToLibrary(file.name, url, file);
+        }
+    </script>
+</body>
+</html>

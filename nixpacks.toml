@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["python39", "ffmpeg"]
+
+[phases.install]
+cmds = ["pip install -r web_backend/requirements.txt"]
+
+[start]
+cmd = "python web_backend/app.py"
