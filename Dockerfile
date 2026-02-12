@@ -20,12 +20,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY web_backend/ ./web_backend/
 COPY SS_tools-main/ ./SS_tools-main/
 
-# 暴露端口
-EXPOSE 8888
-
 # 设置环境变量
 ENV PYTHONUNBUFFERED=1
-ENV PORT=8888
+
+# 暴露端口（Zeabur 会动态分配）
+EXPOSE 8888
 
 # 启动命令
 CMD ["python", "web_backend/app.py"]
