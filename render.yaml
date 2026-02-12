@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: duck-image-tool
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    envVars:
+      - key: PORT
+        value: 8888
+      - key: PYTHONUNBUFFERED
+        value: 1
+    healthCheckPath: /api/health
