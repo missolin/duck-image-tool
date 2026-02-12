@@ -1,0 +1,6 @@
+moviepy==2.2.1
+numpy
+pillow
+opencv-python
+soundfile
+imageio-ffmpeg
