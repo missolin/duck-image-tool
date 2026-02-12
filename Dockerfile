@@ -16,8 +16,9 @@ COPY web_backend/requirements.txt .
 # 安装 Python 依赖
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制所有代码
-COPY . .
+# 复制应用代码
+COPY web_backend/ ./web_backend/
+COPY "SS_tools-main 2/" "./SS_tools-main 2/"
 
 # 暴露端口
 EXPOSE 8888
