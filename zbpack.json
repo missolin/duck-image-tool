@@ -1,0 +1,5 @@
+{
+  "build_command": "",
+  "install_command": "",
+  "start_command": "python web_backend/app.py"
+}
