@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制应用代码
 COPY web_backend/ ./web_backend/
-COPY "SS_tools-main 2/" "./SS_tools-main 2/"
+COPY SS_tools-main/ ./SS_tools-main/
 
 # 暴露端口
 EXPOSE 8888

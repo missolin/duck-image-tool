@@ -87,8 +87,9 @@ def _parse_header(header: bytes, password: str):
 
 # 导入编码逻辑
 import sys
-# 添加 SS_tools-main 2 到 Python 路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'SS_tools-main 2'))
+import os
+# 添加 SS_tools-main 到 Python 路径
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'SS_tools-main'))
 from duck_payload_exporter import export_duck_payload, _bytes_to_binary_image
 
 app = Flask(__name__)
@@ -398,5 +399,6 @@ def fetch_image():
         return jsonify({'error': f'获取图片失败: {str(e)}'}), 500
 
 if __name__ == '__main__':
+    import os
     port = int(os.environ.get('PORT', 8888))
     app.run(host='0.0.0.0', port=port, debug=False)
