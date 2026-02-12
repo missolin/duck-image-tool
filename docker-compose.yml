@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8888:8888"
+    environment:
+      - PORT=8888
+    volumes:
+      - ./web_backend:/app/web_backend
+      - ./SS_tools-main 2:/app/SS_tools-main 2
+    restart: unless-stopped
